@@ -15,6 +15,10 @@ public class Player extends Entity{
 
     public final int screenX;
     public final int screenY;
+    public int hasKey = 0;
+    int standCounter = 0;
+    boolean isMoving = false;
+    int pixelCounter = 0;
 
 
     public Player(GamePanel gp, KeyHandler keyH){
@@ -25,10 +29,12 @@ public class Player extends Entity{
         screenY = gp.screenHeight / 2 - (gp.tileSize / 2); // making player actually centered
 
         solidArea = new Rectangle(); // Makes character's collision smaller
-        solidArea.x = 0;
-        solidArea.y = 0;
-        solidArea.width = 32;
-        solidArea.height = 32;
+        solidArea.x = 1;
+        solidArea.y = 1;
+        solidAreaDefaultX = solidArea.x;
+        solidAreaDefaultY = solidArea.y;
+        solidArea.width = 46;
+        solidArea.height = 46;
 
         setDefaultValues();
         getPlayerImage();
@@ -61,22 +67,38 @@ public class Player extends Entity{
 
     public void update(){
 
-        if(keyH.upPressed == true || keyH.downPressed == true // No animations when idle
-                || keyH.leftPressed == true || keyH.rightPressed == true) {
+        if (!isMoving) {
+            if (keyH.upPressed == true || keyH.downPressed == true // No animations when idle
+                    || keyH.leftPressed == true || keyH.rightPressed == true) {
 
-            if(keyH.upPressed) {
-                direction = "up";
-            } else if (keyH.downPressed) {
-                direction = "down";
-            } else if (keyH.leftPressed) {
-                direction = "left";
-            } else if (keyH.rightPressed) {
-                direction = "right";
+                if (keyH.upPressed) {
+                    direction = "up";
+                } else if (keyH.downPressed) {
+                    direction = "down";
+                } else if (keyH.leftPressed) {
+                    direction = "left";
+                } else if (keyH.rightPressed) {
+                    direction = "right";
+                }
+
+                isMoving = true;
+
+                // Check Tile Collision
+                collisionOn = false;
+                gp.cCheck.checkTile(this); // Check tile collision
+
+                // Check Object Collision
+                int objIndex = gp.cCheck.checkObject(this, true);
+                pickUpObject(objIndex);
+            } else {
+                standCounter++;
+                if (standCounter == 20) {
+                    spriteNum = 1; // Standstill animation
+                    standCounter = 0;
+                }
             }
-
-            collisionOn = false;
-            gp.cCheck.checkTile(this); // Check tile collision
-
+        }
+        if (isMoving) {
             // If collision is false player can move
             if (!collisionOn) {
                 switch (direction) {
@@ -86,18 +108,63 @@ public class Player extends Entity{
                     case "right" -> worldX += speed;
                 }
             }
-
             spriteCounter++;
-            if(spriteCounter > 10) { // Frequency of animations
-                if(spriteNum == 1) {
+            if (spriteCounter > 10) { // Frequency of animations
+                if (spriteNum == 1) {
                     spriteNum = 2;
                 } else if (spriteNum == 2) {
                     spriteNum = 1;
                 }
                 spriteCounter = 0;
             }
+            pixelCounter += speed;
+
+            if (pixelCounter == 48) { // might be a problem when character levels up...
+                isMoving = false;
+                pixelCounter = 0;
+            }
         }
     }
+
+    public void pickUpObject(int i) {
+
+        if(i != 999) {
+
+            String objectName = gp.obj[i].name;
+
+            switch(objectName) {
+                case "Key":
+                    gp.playSFX(1);
+                    hasKey ++;
+                    gp.obj[i] = null;
+                    gp.ui.showMessage("You got a key!");
+                    break;
+                case "Door":
+                    if(hasKey > 0) {
+                        gp.playSFX(3);
+                        gp.obj[i] = null;
+                        hasKey --;
+                        gp.ui.showMessage("You opened the door!");
+                    }
+                    else {
+                        gp.ui.showMessage("You need a key!");
+                    }
+                    break;
+                case "Hell":
+                    gp.playSFX(2);
+                    gp.obj[i] = null;
+                    speed += 2;
+                    gp.ui.showMessage("You drank hell!!");
+                    break;
+                case "Jameson":
+                    gp.ui.gameFinished = true;
+                    gp.stopMusic();
+                    gp.playSFX(4);
+                    break;
+            }
+        }
+    }
+
     public void draw(Graphics2D g2) {
 
 //        g2.setColor(Color.white);
@@ -140,5 +207,9 @@ public class Player extends Entity{
                 break;
         }
         g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+
+        // Troubleshoot collisions
+        // g2.setColor(Color.red);
+        // g2.drawRect(screenX + solidArea.x, screenY + solidArea.y, solidArea.width, solidArea.height);
     }
 }
