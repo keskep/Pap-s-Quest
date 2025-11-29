@@ -2,6 +2,7 @@ package entity;
 
 import main.GamePanel;
 import main.KeyHandler;
+import main.UtilityTools;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -48,23 +49,30 @@ public class Player extends Entity{
         direction = "down";
     }
     public void getPlayerImage() {
+        
+        up1 = setup("pap_up_1");
+        up2 = setup("pap_up_2");
+        down1 = setup("pap_down_1");
+        down2 = setup("pap_down_2");
+        left1 = setup("pap_left_1");
+        left2 = setup("pap_left_2");
+        right1 = setup("pap_right_1");
+        right2 = setup("pap_right_2");
+    }
+    
+    public BufferedImage setup(String imageName) {
 
+        UtilityTools uTools = new UtilityTools();
+        BufferedImage image = null;
+        
         try {
-
-            up1 = ImageIO.read(getClass().getClassLoader().getResourceAsStream("player/pap_up_1.png"));
-            up2 = ImageIO.read(getClass().getClassLoader().getResourceAsStream("player/pap_up_2.png"));
-            down1 = ImageIO.read(getClass().getClassLoader().getResourceAsStream("player/pap_down_1.png"));
-            down2 = ImageIO.read(getClass().getClassLoader().getResourceAsStream("player/pap_down_2.png"));
-            left1 = ImageIO.read(getClass().getClassLoader().getResourceAsStream("player/pap_left_1.png"));
-            left2 = ImageIO.read(getClass().getClassLoader().getResourceAsStream("player/pap_left_2.png"));
-            right1 = ImageIO.read(getClass().getClassLoader().getResourceAsStream("player/pap_right_1.png"));
-            right2 = ImageIO.read(getClass().getClassLoader().getResourceAsStream("player/pap_right_2.png"));
-
+            image = ImageIO.read(getClass().getClassLoader().getResourceAsStream("player/" + imageName + ".png"));
+            image = uTools.scaleImage(image, gp.tileSize, gp.tileSize);
         }catch (IOException e) {
             e.printStackTrace();
         }
+        return image;
     }
-
     public void update(){
 
         if (!isMoving) {
@@ -206,7 +214,7 @@ public class Player extends Entity{
                 }
                 break;
         }
-        g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+        g2.drawImage(image, screenX, screenY, null);
 
         // Troubleshoot collisions
         // g2.setColor(Color.red);
