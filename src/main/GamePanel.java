@@ -28,7 +28,7 @@ public class GamePanel extends JPanel implements Runnable{ // Runnable for the t
 
     // System
     TileManager tileM = new TileManager(this);
-    KeyHandler keyH = new KeyHandler();
+    KeyHandler keyH = new KeyHandler(this);
     Sound sfx = new Sound();
     Sound music = new Sound();
     public CollisionCheck cCheck = new CollisionCheck(this);
@@ -39,6 +39,11 @@ public class GamePanel extends JPanel implements Runnable{ // Runnable for the t
     // Entity & Objects
     public Player player = new Player(this, keyH);
     public SuperObject obj[] = new SuperObject[10]; // 10 replaceable slots
+    
+    // Game State
+    public int gameState;
+    public final int playState = 1;
+    public final int pauseState = 0;
 
     public GamePanel() {
 
@@ -54,6 +59,8 @@ public class GamePanel extends JPanel implements Runnable{ // Runnable for the t
         setAs.setObject();
 
         playMusic(0);
+        stopMusic();
+        gameState = playState;
     }
 
     public void startGameThread() {
@@ -127,8 +134,13 @@ public class GamePanel extends JPanel implements Runnable{ // Runnable for the t
     }
 
     public void update() {
-
-        player.update();
+        
+        if (gameState == playState) {
+            player.update();
+        }
+        if (gameState == pauseState) {
+            // Pause game
+        }
     }
 
     public void paintComponent(Graphics g) {

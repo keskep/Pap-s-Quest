@@ -16,7 +16,6 @@ public class Player extends Entity{
 
     public final int screenX;
     public final int screenY;
-    public int hasKey = 0;
     int standCounter = 0;
     boolean isMoving = false;
     int pixelCounter = 0;
@@ -137,39 +136,8 @@ public class Player extends Entity{
     public void pickUpObject(int i) {
 
         if(i != 999) {
-
-            String objectName = gp.obj[i].name;
-
-            switch(objectName) {
-                case "Key":
-                    gp.playSFX(1);
-                    hasKey ++;
-                    gp.obj[i] = null;
-                    gp.ui.showMessage("You got a key!");
-                    break;
-                case "Door":
-                    if(hasKey > 0) {
-                        gp.playSFX(3);
-                        gp.obj[i] = null;
-                        hasKey --;
-                        gp.ui.showMessage("You opened the door!");
-                    }
-                    else {
-                        gp.ui.showMessage("You need a key!");
-                    }
-                    break;
-                case "Hell":
-                    gp.playSFX(2);
-                    gp.obj[i] = null;
-                    speed += 2;
-                    gp.ui.showMessage("You drank hell!!");
-                    break;
-                case "Jameson":
-                    gp.ui.gameFinished = true;
-                    gp.stopMusic();
-                    gp.playSFX(4);
-                    break;
-            }
+            
+            
         }
     }
 
