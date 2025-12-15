@@ -9,32 +9,29 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-public class Player extends Entity{
+public class Player extends Entity {
 
-    GamePanel gp;
     KeyHandler keyH;
-
     public final int screenX;
     public final int screenY;
     int standCounter = 0;
-    boolean isMoving = false;
-    int pixelCounter = 0;
 
 
-    public Player(GamePanel gp, KeyHandler keyH){
-        this.gp = gp;
+    public Player(GamePanel gp, KeyHandler keyH) {
+
+        super(gp); // Pass gp to Entity constructor
         this.keyH = keyH;
 
         screenX = gp.screenWidth / 2 - (gp.tileSize / 2); // Subtract half a tile length from both screenX & screenY
         screenY = gp.screenHeight / 2 - (gp.tileSize / 2); // making player actually centered
 
         solidArea = new Rectangle(); // Makes character's collision smaller
-        solidArea.x = 1;
-        solidArea.y = 1;
+        solidArea.x = 8;
+        solidArea.y = 16;
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
-        solidArea.width = 46;
-        solidArea.height = 46;
+        solidArea.width = 32;
+        solidArea.height = 32;
 
         setDefaultValues();
         getPlayerImage();
@@ -47,65 +44,46 @@ public class Player extends Entity{
         speed = 4;
         direction = "down";
     }
+
     public void getPlayerImage() {
-        
-        up1 = setup("pap_up_1");
-        up2 = setup("pap_up_2");
-        down1 = setup("pap_down_1");
-        down2 = setup("pap_down_2");
-        left1 = setup("pap_left_1");
-        left2 = setup("pap_left_2");
-        right1 = setup("pap_right_1");
-        right2 = setup("pap_right_2");
+
+        up1 = setup("player/pap_up_1");
+        up2 = setup("player/pap_up_2");
+        down1 = setup("player/pap_down_1");
+        down2 = setup("player/pap_down_2");
+        left1 = setup("player/pap_left_1");
+        left2 = setup("player/pap_left_2");
+        right1 = setup("player/pap_right_1");
+        right2 = setup("player/pap_right_2");
     }
-    
-    public BufferedImage setup(String imageName) {
 
-        UtilityTools uTools = new UtilityTools();
-        BufferedImage image = null;
-        
-        try {
-            image = ImageIO.read(getClass().getClassLoader().getResourceAsStream("player/" + imageName + ".png"));
-            image = uTools.scaleImage(image, gp.tileSize, gp.tileSize);
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
-        return image;
-    }
-    public void update(){
+    public void update() {
 
-        if (!isMoving) {
-            if (keyH.upPressed == true || keyH.downPressed == true // No animations when idle
-                    || keyH.leftPressed == true || keyH.rightPressed == true) {
+        if (keyH.upPressed == true || keyH.downPressed == true // No animations when idle
+            || keyH.leftPressed == true || keyH.rightPressed == true) {
 
-                if (keyH.upPressed) {
-                    direction = "up";
-                } else if (keyH.downPressed) {
-                    direction = "down";
-                } else if (keyH.leftPressed) {
-                    direction = "left";
-                } else if (keyH.rightPressed) {
-                    direction = "right";
-                }
-
-                isMoving = true;
-
-                // Check Tile Collision
-                collisionOn = false;
-                gp.cCheck.checkTile(this); // Check tile collision
-
-                // Check Object Collision
-                int objIndex = gp.cCheck.checkObject(this, true);
-                pickUpObject(objIndex);
-            } else {
-                standCounter++;
-                if (standCounter == 20) {
-                    spriteNum = 1; // Standstill animation
-                    standCounter = 0;
-                }
+            if (keyH.upPressed) {
+                direction = "up";
+            } else if (keyH.downPressed) {
+                direction = "down";
+            } else if (keyH.leftPressed) {
+                direction = "left";
+            } else if (keyH.rightPressed) {
+                direction = "right";
             }
-        }
-        if (isMoving) {
+
+            // Check Tile Collision
+            collisionOn = false;
+            gp.cCheck.checkTile(this); // Check tile collision
+
+            // Check Object Collision
+            int objIndex = gp.cCheck.checkObject(this, true);
+            pickUpObject(objIndex);
+            
+            // Check NPC collision
+            int npcIndex = gp.cCheck.checkEntity(this, gp.npc);
+            interactNPC(npcIndex);
+            
             // If collision is false player can move
             if (!collisionOn) {
                 switch (direction) {
@@ -124,22 +102,29 @@ public class Player extends Entity{
                 }
                 spriteCounter = 0;
             }
-            pixelCounter += speed;
-
-            if (pixelCounter == 48) { // might be a problem when character levels up...
-                isMoving = false;
-                pixelCounter = 0;
+        } else {
+            standCounter++;
+            if (standCounter == 20) {
+                spriteNum = 1; // Standstill animation
+                standCounter = 0;
             }
         }
     }
-
+    
     public void pickUpObject(int i) {
 
         if(i != 999) {
             
-            
         }
     }
+    
+    public void interactNPC(int i) {
+
+        if (i != 999) {
+            //System.out.println("Colliding with NPC");
+        }
+    }
+    
 
     public void draw(Graphics2D g2) {
 
@@ -185,7 +170,7 @@ public class Player extends Entity{
         g2.drawImage(image, screenX, screenY, null);
 
         // Troubleshoot collisions
-        // g2.setColor(Color.red);
-        // g2.drawRect(screenX + solidArea.x, screenY + solidArea.y, solidArea.width, solidArea.height);
+        //g2.setColor(Color.red);
+        //g2.drawRect(screenX + solidArea.x, screenY + solidArea.y, solidArea.width, solidArea.height);
     }
 }
